@@ -20,97 +20,183 @@ class _VideoSequencePlayer2State extends State<VideoSequencePlayer2> {
     "https://storage.googleapis.com/upcj-fb059.appspot.com/MentalHealth.mp4",
   ]; // Populate with your video URLs
   int currentIndex = 0;
-  late BetterPlayerController betterPlayerController;
-
+  late BetterPlayerController activeBetterPlayerController;
+  late List<BetterPlayerController> betterPlayerControllers;
   @override
   void initState() {
-    initializeAndPlay(currentIndex);
+    print("initState");
+    initializeAndPlay(currentIndex, videoUrls);
     super.initState();
   }
 
-  void initializeAndPlay(int index) {
-    print("init and play");
-    BetterPlayerDataSource dataSource = BetterPlayerDataSource(
-      BetterPlayerDataSourceType.network,
-      videoUrls[index],
-    );
-    betterPlayerController = BetterPlayerController(
-      BetterPlayerConfiguration(
-        // autoPlay: true,
-        controlsConfiguration: BetterPlayerControlsConfiguration(
-          playerTheme: BetterPlayerTheme.custom,
-          customControlsBuilder: (controller, onControlsVisibilityChanged) =>
-              CustomControlsWidget(
-            controller: controller,
-            onControlsVisibilityChanged: onControlsVisibilityChanged,
+  List<BetterPlayerController> initControllers(List<String> videoUrls) {
+    List<BetterPlayerController> ctrls = [];
+    BetterPlayerDataSource dataSource;
+    BetterPlayerController target;
+    for (int index = 0; index < videoUrls.length; index++) {
+      dataSource = BetterPlayerDataSource(
+        BetterPlayerDataSourceType.network,
+        videoUrls[index],
+      );
+      if (index == 0) {
+        target = BetterPlayerController(
+          BetterPlayerConfiguration(
+            // autoPlay: true,
+            controlsConfiguration: BetterPlayerControlsConfiguration(
+              playerTheme: BetterPlayerTheme.custom,
+              customControlsBuilder:
+                  (controller, onControlsVisibilityChanged) =>
+                      CustomControlsWidget(
+                controller: controller,
+                onControlsVisibilityChanged: onControlsVisibilityChanged,
+              ),
+            ),
           ),
-        ),
-      ),
-      betterPlayerDataSource: dataSource,
-    );
+          betterPlayerDataSource: dataSource,
+        );
 
-    betterPlayerController.addEventsListener((event) {
-      if (event.betterPlayerEventType == BetterPlayerEventType.finished) {
-        print("Video Finsihed");
-        if (currentIndex < videoUrls.length - 1) {
-          continuePlay(++currentIndex);
-        }
+        target.addEventsListener((event) {
+          if (event.betterPlayerEventType == BetterPlayerEventType.finished) {
+            print("Video Finsihed");
+            if (currentIndex < videoUrls.length - 1) {
+              playVideo(++currentIndex);
+            }
+          }
+        });
+
+        target.setupDataSource(dataSource);
+
+        ctrls.add(target);
+      } else {
+        target = BetterPlayerController(
+          BetterPlayerConfiguration(
+            autoPlay: true,
+            controlsConfiguration: BetterPlayerControlsConfiguration(
+              playerTheme: BetterPlayerTheme.custom,
+              customControlsBuilder:
+                  (controller, onControlsVisibilityChanged) =>
+                      CustomControlsWidget(
+                controller: controller,
+                onControlsVisibilityChanged: onControlsVisibilityChanged,
+              ),
+            ),
+          ),
+          betterPlayerDataSource: dataSource,
+        );
+
+        target.addEventsListener((event) {
+          if (event.betterPlayerEventType == BetterPlayerEventType.finished) {
+            if (currentIndex < videoUrls.length - 1) {
+              playVideo(++currentIndex);
+            }
+          }
+        });
+
+        target.setupDataSource(dataSource);
+        ctrls.add(target);
+        break;
       }
-    });
-
-    betterPlayerController.setupDataSource(dataSource);
+    }
+    return ctrls;
   }
 
-  void continuePlay(int index) {
-    print("continue and play");
-    BetterPlayerDataSource dataSource = BetterPlayerDataSource(
-      BetterPlayerDataSourceType.network,
-      videoUrls[index],
-    );
-
-    betterPlayerController = BetterPlayerController(
-      BetterPlayerConfiguration(
-        autoPlay: true,
-        controlsConfiguration: BetterPlayerControlsConfiguration(
-          playerTheme: BetterPlayerTheme.custom,
-          customControlsBuilder: (controller, onControlsVisibilityChanged) =>
-              CustomControlsWidget(
-            controller: controller,
-            onControlsVisibilityChanged: onControlsVisibilityChanged,
-          ),
-        ),
-      ),
-      betterPlayerDataSource: dataSource,
-    );
-
-    betterPlayerController.addEventsListener((event) {
-      if (event.betterPlayerEventType == BetterPlayerEventType.finished) {
-        if (currentIndex < videoUrls.length - 1) {
-          continuePlay(++currentIndex);
-        }
-      }
-    });
-
-    betterPlayerController.setupDataSource(dataSource);
+  /// Preconditon all better player controllers must be initalized
+  void playVideo(int index) {
     setState(() {
-      print("setstae called");
+      print("fired");
+      activeBetterPlayerController = betterPlayerControllers[index];
     });
   }
+
+  void initializeAndPlay(int initIndex, List<String> video) {
+    betterPlayerControllers = initControllers(videoUrls);
+    activeBetterPlayerController = betterPlayerControllers[initIndex];
+  }
+  // void initializeAndPlay(int index) {
+  //   print("init and play");
+  //   BetterPlayerDataSource dataSource = BetterPlayerDataSource(
+  //     BetterPlayerDataSourceType.network,
+  //     videoUrls[index],
+  //   );
+  //   activeBetterPlayerController = BetterPlayerController(
+  //     BetterPlayerConfiguration(
+  //       // autoPlay: true,
+  //       controlsConfiguration: BetterPlayerControlsConfiguration(
+  //         playerTheme: BetterPlayerTheme.custom,
+  //         customControlsBuilder: (controller, onControlsVisibilityChanged) =>
+  //             CustomControlsWidget(
+  //           controller: controller,
+  //           onControlsVisibilityChanged: onControlsVisibilityChanged,
+  //         ),
+  //       ),
+  //     ),
+  //     betterPlayerDataSource: dataSource,
+  //   );
+
+  //   activeBetterPlayerController.addEventsListener((event) {
+  //     if (event.betterPlayerEventType == BetterPlayerEventType.finished) {
+  //       print("Video Finsihed");
+  //       if (currentIndex < videoUrls.length - 1) {
+  //         continuePlay(++currentIndex);
+  //       }
+  //     }
+  //   });
+
+  //   activeBetterPlayerController.setupDataSource(dataSource);
+  // }
+
+  // void continuePlay(int index) {
+  //   print("continue and play");
+  //   BetterPlayerDataSource dataSource = BetterPlayerDataSource(
+  //     BetterPlayerDataSourceType.network,
+  //     videoUrls[index],
+  //   );
+
+  //   activeBetterPlayerController = BetterPlayerController(
+  //     BetterPlayerConfiguration(
+  //       autoPlay: true,
+  //       controlsConfiguration: BetterPlayerControlsConfiguration(
+  //         playerTheme: BetterPlayerTheme.custom,
+  //         customControlsBuilder: (controller, onControlsVisibilityChanged) =>
+  //             CustomControlsWidget(
+  //           controller: controller,
+  //           onControlsVisibilityChanged: onControlsVisibilityChanged,
+  //         ),
+  //       ),
+  //     ),
+  //     betterPlayerDataSource: dataSource,
+  //   );
+
+  //   activeBetterPlayerController.addEventsListener((event) {
+  //     if (event.betterPlayerEventType == BetterPlayerEventType.finished) {
+  //       if (currentIndex < videoUrls.length - 1) {
+  //         continuePlay(++currentIndex);
+  //       }
+  //     }
+  //   });
+
+  //   activeBetterPlayerController.setupDataSource(dataSource);
+  //   setState(() {
+  //     print("setstae called");
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
+    print(
+        " AUTOPLAY ${activeBetterPlayerController.betterPlayerConfiguration.autoPlay}");
     return Scaffold(
       appBar: AppBar(title: Text("Video Sequence Player POC")),
       body: AspectRatio(
         aspectRatio: 16 / 9,
-        child: BetterPlayer(controller: betterPlayerController),
+        child: BetterPlayer(controller: activeBetterPlayerController),
       ),
     );
   }
 
   @override
   void dispose() {
-    betterPlayerController.dispose();
+    activeBetterPlayerController.dispose();
     super.dispose();
   }
 }
