@@ -1,32 +1,65 @@
 import 'package:flutter/material.dart';
+import 'package:reordablelist/demo/demo_player.dart';
+import 'package:reordablelist/demo/video.dart';
 
-class CustomAttempt extends StatefulWidget {
-  const CustomAttempt({super.key});
+class Demo extends StatefulWidget {
+  const Demo({super.key});
 
   @override
-  State<CustomAttempt> createState() => _CustomAttemptState();
+  State<Demo> createState() => _DemoState();
 }
 
-class _CustomAttemptState extends State<CustomAttempt> {
-  List<String> list1Items = List.generate(10, (index) => 'Video $index');
-  List<String> list2Items = [];
-
+class _DemoState extends State<Demo> {
+  List<Video> videoLibrary = [
+    Video(
+        url:
+            "https://storage.googleapis.com/staging.elite-firefly-403919.appspot.com/10sec1.mp4",
+        name: "Clip1"),
+    Video(
+        url:
+            "https://storage.googleapis.com/staging.elite-firefly-403919.appspot.com/10sec2.mp4",
+        name: "Clip2"),
+    Video(
+        url:
+            "https://storage.googleapis.com/staging.elite-firefly-403919.appspot.com/10sec1.mp4",
+        name: "Clip3"),
+    Video(
+        url:
+            "https://storage.googleapis.com/staging.elite-firefly-403919.appspot.com/10sec2.mp4",
+        name: "Clip4"),
+  ];
+  List<Video> timeline = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Video Builder UI POC'),
+        title: Text("Video Builder POC"),
       ),
       body: Column(
         children: [
-          Expanded(
+          SizedBox(
+            width: MediaQuery.sizeOf(context).width,
+            height: MediaQuery.sizeOf(context).height * .4,
+            child: DemoPlayer(
+              videoToBePlayed: timeline,
+              key: ValueKey(timeline.map((video) => video.name).join("-")),
+            ),
+          ),
+          Container(
+            color: Colors.grey.shade300,
+            width: MediaQuery.sizeOf(context).width,
+            height: MediaQuery.sizeOf(context).height * .1,
             child: ListView.builder(
-              itemCount: list1Items.length,
+              scrollDirection: Axis.horizontal,
+              itemCount: videoLibrary.length,
               itemBuilder: (context, index) {
-                return Draggable<String>(
-                  data: list1Items[index],
-                  child: ListTile(
-                    title: Text(list1Items[index]),
+                return Draggable<Video>(
+                  data: videoLibrary[index],
+                  child: SizedBox(
+                    width: 100,
+                    child: ListTile(
+                      title: Text(videoLibrary[index].name),
+                    ),
                   ),
                   feedback: Material(
                       child: Container(
@@ -35,7 +68,7 @@ class _CustomAttemptState extends State<CustomAttempt> {
                           width: 200,
                           color: Colors.blue.shade100,
                           child: Text(
-                            list1Items[index],
+                            videoLibrary[index].name,
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold),
                           ))),
@@ -43,14 +76,17 @@ class _CustomAttemptState extends State<CustomAttempt> {
               },
             ),
           ),
+          SizedBox(
+            height: 20,
+          ),
           Container(
             color: Colors.green.shade100,
             height: 200,
             width: MediaQuery.sizeOf(context).width,
-            child: DragTarget<String>(
+            child: DragTarget<Video>(
               onAccept: (receivedItem) {
                 setState(() {
-                  list2Items.add(receivedItem);
+                  timeline.add(receivedItem);
                 });
               },
               builder: (context, candidateData, rejectedData) =>
@@ -61,12 +97,12 @@ class _CustomAttemptState extends State<CustomAttempt> {
                     if (newIndex > oldIndex) {
                       newIndex -= 1;
                     }
-                    final item = list2Items.removeAt(oldIndex);
-                    list2Items.insert(newIndex, item);
+                    final item = timeline.removeAt(oldIndex);
+                    timeline.insert(newIndex, item);
                   });
                 },
                 children: [
-                  for (int i = 0; i < list2Items.length; i++)
+                  for (int i = 0; i < timeline.length; i++)
                     Padding(
                       key: UniqueKey(),
                       padding: EdgeInsets.only(top: 10, left: i == 0 ? 15 : 0),
@@ -78,7 +114,7 @@ class _CustomAttemptState extends State<CustomAttempt> {
                             child: IconButton(
                                 onPressed: () {
                                   setState(() {
-                                    list2Items.removeAt(i);
+                                    timeline.removeAt(i);
                                   });
                                 },
                                 icon: Icon(
@@ -93,7 +129,7 @@ class _CustomAttemptState extends State<CustomAttempt> {
                               width: 110,
                               height: 100,
                               child: ListTile(
-                                title: Text(list2Items[i]),
+                                title: Text(timeline[i].name),
                               ),
                             ),
                           ),

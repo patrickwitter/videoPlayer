@@ -1,42 +1,37 @@
 import 'package:better_player/better_player.dart';
 
 import 'package:flutter/material.dart';
+import 'package:reordablelist/demo/video.dart';
 
-/// The code below is experm=imental for custom video controls to match the design
-///
-///
-///
+//BUG THIRD VIDEO WON't PLAY DOESN't seem to be the dispose methods
+class DemoPlayer extends StatefulWidget {
+  const DemoPlayer({super.key, required this.videoToBePlayed});
+  final List<Video> videoToBePlayed;
 
-class VideoSequencePlayer2 extends StatefulWidget {
   @override
-  _VideoSequencePlayer2State createState() => _VideoSequencePlayer2State();
+  _DemoPlayerState createState() => _DemoPlayerState();
 }
 
-class _VideoSequencePlayer2State extends State<VideoSequencePlayer2> {
-  List<String> videoUrls = [
-    "https://storage.googleapis.com/staging.elite-firefly-403919.appspot.com/10sec1.mp4",
-    "https://storage.googleapis.com/staging.elite-firefly-403919.appspot.com/10sec2.mp4",
-    "https://storage.googleapis.com/staging.elite-firefly-403919.appspot.com/10sec1.mp4",
-    "https://storage.googleapis.com/staging.elite-firefly-403919.appspot.com/10sec2.mp4",
-  ]; // Populate with your video URLs
+class _DemoPlayerState extends State<DemoPlayer> {
   int currentIndex = 0;
   late BetterPlayerController activeBetterPlayerController;
-  late List<BetterPlayerController> betterPlayerControllers;
+  List<BetterPlayerController> betterPlayerControllers = [];
+  List<Video> get v => widget.videoToBePlayed;
   @override
   void initState() {
-    print("initState");
-    initializeAndPlay(currentIndex, videoUrls);
+    print("initState---------- TIMELINE LENGTH ----------- ${v.length}");
+    initializeAndPlay(currentIndex, v);
     super.initState();
   }
 
-  List<BetterPlayerController> initControllers(List<String> videoUrls) {
+  List<BetterPlayerController> initControllers(List<Video> videos) {
     List<BetterPlayerController> ctrls = [];
     BetterPlayerDataSource dataSource;
     BetterPlayerController target;
-    for (int index = 0; index < videoUrls.length; index++) {
+    for (int index = 0; index < videos.length; index++) {
       dataSource = BetterPlayerDataSource(
         BetterPlayerDataSourceType.network,
-        videoUrls[index],
+        videos[index].url,
       );
       if (index == 0) {
         target = BetterPlayerController(
@@ -47,6 +42,9 @@ class _VideoSequencePlayer2State extends State<VideoSequencePlayer2> {
               customControlsBuilder:
                   (controller, onControlsVisibilityChanged) =>
                       CustomControlsWidget(
+                // key: ValueKey(widget.videoToBePlayed
+                //     .map((video) => video.name)
+                //     .join("-")),
                 controller: controller,
                 onControlsVisibilityChanged: onControlsVisibilityChanged,
               ),
@@ -58,7 +56,7 @@ class _VideoSequencePlayer2State extends State<VideoSequencePlayer2> {
         target.addEventsListener((event) {
           if (event.betterPlayerEventType == BetterPlayerEventType.finished) {
             print("Video Finsihed");
-            if (currentIndex < videoUrls.length - 1) {
+            if (currentIndex < videos.length - 1) {
               playVideo(++currentIndex);
             }
           }
@@ -76,6 +74,9 @@ class _VideoSequencePlayer2State extends State<VideoSequencePlayer2> {
               customControlsBuilder:
                   (controller, onControlsVisibilityChanged) =>
                       CustomControlsWidget(
+                // key: ValueKey(widget.videoToBePlayed
+                //     .map((video) => video.name)
+                //     .join("-")),
                 controller: controller,
                 onControlsVisibilityChanged: onControlsVisibilityChanged,
               ),
@@ -86,7 +87,7 @@ class _VideoSequencePlayer2State extends State<VideoSequencePlayer2> {
 
         target.addEventsListener((event) {
           if (event.betterPlayerEventType == BetterPlayerEventType.finished) {
-            if (currentIndex < videoUrls.length - 1) {
+            if (currentIndex < videos.length - 1) {
               playVideo(++currentIndex);
             }
           }
@@ -102,28 +103,33 @@ class _VideoSequencePlayer2State extends State<VideoSequencePlayer2> {
   /// Preconditon all better player controllers must be initalized
   void playVideo(int index) {
     setState(() {
-      print("------------------------fired------------------------");
+      print("------------------------fired------------------------ $index");
       activeBetterPlayerController = betterPlayerControllers[index];
       activeBetterPlayerController.play();
     });
   }
 
-  void initializeAndPlay(int initIndex, List<String> video) {
+  void initializeAndPlay(int initIndex, List<Video> video) {
     print("LENGTH VIDEO ${video.length}  ");
-    betterPlayerControllers = initControllers(videoUrls);
-    print("LENGTH ${betterPlayerControllers.length}");
-    activeBetterPlayerController = betterPlayerControllers[initIndex];
+    if (video.isNotEmpty) {
+      betterPlayerControllers = initControllers(video);
+      print("LENGTH ${betterPlayerControllers.length}");
+      activeBetterPlayerController = betterPlayerControllers[initIndex];
+      print("----DONE INIT");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // print(
-    //     " AUTOPLAY ${activeBetterPlayerController.betterPlayerConfiguration.autoPlay}");
+    print(" LENGTH OF CONTROLLERS  ${betterPlayerControllers.length}");
     return Scaffold(
-      appBar: AppBar(title: Text("Video Sequence Player POC")),
       body: AspectRatio(
         aspectRatio: 16 / 9,
-        child: BetterPlayer(controller: activeBetterPlayerController),
+        child: widget.videoToBePlayed.isNotEmpty
+            ? BetterPlayer(controller: activeBetterPlayerController)
+            : Container(
+                color: Colors.black,
+              ),
       ),
     );
   }
@@ -137,6 +143,7 @@ class _VideoSequencePlayer2State extends State<VideoSequencePlayer2> {
   }
 }
 
+//----------- CUSTOM CONTROLS----------------------
 class CustomControlsWidget extends StatefulWidget {
   final BetterPlayerController? controller;
   final Function(bool visbility)? onControlsVisibilityChanged;
@@ -171,7 +178,7 @@ class _CustomControlsWidgetState extends State<CustomControlsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    print("${widget.controller!.isVideoInitialized()!}");
+    print("VIDEO INITIALZED ${widget.controller!.isVideoInitialized()!}");
     return Positioned.fill(
       child: widget.controller!.isVideoInitialized()!
           ? Stack(
@@ -345,14 +352,16 @@ class _CustomProgressBarState extends State<CustomProgressBar> {
             widget.controller.videoPlayerController!.value.position;
     widget.controller.addEventsListener((event) {
       if (event.betterPlayerEventType == BetterPlayerEventType.progress) {
-        setState(() {
-          _progress = widget
-              .controller.videoPlayerController!.value.position.inSeconds
-              .toDouble();
-          _remainingDuration =
-              widget.controller.videoPlayerController!.value.duration! -
-                  widget.controller.videoPlayerController!.value.position;
-        });
+        if (mounted) {
+          setState(() {
+            _progress = widget
+                .controller.videoPlayerController!.value.position.inSeconds
+                .toDouble();
+            _remainingDuration =
+                widget.controller.videoPlayerController!.value.duration! -
+                    widget.controller.videoPlayerController!.value.position;
+          });
+        }
       }
     });
   }
@@ -376,15 +385,17 @@ class _CustomProgressBarState extends State<CustomProgressBar> {
                       .inSeconds
                       .toDouble(),
                   onChanged: (value) {
-                    setState(() {
-                      _progress = value;
-                      widget.controller
-                          .seekTo(Duration(seconds: _progress.toInt()));
-                      _remainingDuration = widget.controller
-                              .videoPlayerController!.value.duration! -
-                          widget
-                              .controller.videoPlayerController!.value.position;
-                    });
+                    if (mounted) {
+                      setState(() {
+                        _progress = value;
+                        widget.controller
+                            .seekTo(Duration(seconds: _progress.toInt()));
+                        _remainingDuration = widget.controller
+                                .videoPlayerController!.value.duration! -
+                            widget.controller.videoPlayerController!.value
+                                .position;
+                      });
+                    }
                   },
                 ),
               ),
@@ -398,12 +409,5 @@ class _CustomProgressBarState extends State<CustomProgressBar> {
             ],
           )
         : const SizedBox.shrink();
-  }
-
-  @override
-  void dispose() {
-    print("-------Called Dispose------");
-    widget.controller.dispose();
-    super.dispose();
   }
 }

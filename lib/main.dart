@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:reordablelist/custom_attempt.dart';
+import 'package:reordablelist/demo/demo.dart';
 import 'package:reordablelist/listtolist/basic_example.dart';
 import 'package:reordablelist/listtolist/dragintolist.dart';
 import 'package:reordablelist/listtolist/horizaontal_example.dart';
@@ -29,8 +30,10 @@ class MyApp extends StatelessWidget {
       // home: BasicExample(),
       // home: HorizontalExample(),
       // home: ReorderableListViewPage(),
+      // home: const CustomAttempt(),
       // home: VideoSequencePlayer(),
-      home: VideoSequencePlayer2(),
+      // home: VideoSequencePlayer2(),
+      home: Demo(),
     );
   }
 }
