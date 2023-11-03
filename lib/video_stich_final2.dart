@@ -7,21 +7,20 @@ import 'package:flutter/material.dart';
 ///
 ///
 
-class VideoSequencePlayer2 extends StatefulWidget {
+class VideoSequencePlayer3 extends StatefulWidget {
   @override
-  _VideoSequencePlayer2State createState() => _VideoSequencePlayer2State();
+  _VideoSequencePlayer3State createState() => _VideoSequencePlayer3State();
 }
 
-class _VideoSequencePlayer2State extends State<VideoSequencePlayer2> {
+class _VideoSequencePlayer3State extends State<VideoSequencePlayer3> {
   List<String> videoUrls = [
-    "https://storage.googleapis.com/staging.elite-firefly-403919.appspot.com/10sec1.mp4",
-    "https://storage.googleapis.com/staging.elite-firefly-403919.appspot.com/10sec2.mp4",
     "https://storage.googleapis.com/staging.elite-firefly-403919.appspot.com/10sec1.mp4",
     "https://storage.googleapis.com/staging.elite-firefly-403919.appspot.com/10sec2.mp4",
   ]; // Populate with your video URLs
   int currentIndex = 0;
   late BetterPlayerController activeBetterPlayerController;
   late List<BetterPlayerController> betterPlayerControllers;
+  Key refreshKey = UniqueKey();
   @override
   void initState() {
     print("initState");
@@ -122,6 +121,7 @@ class _VideoSequencePlayer2State extends State<VideoSequencePlayer2> {
     return Scaffold(
       appBar: AppBar(title: Text("Video Sequence Player POC")),
       body: AspectRatio(
+        key: refreshKey,
         aspectRatio: 16 / 9,
         child: BetterPlayer(
           controller: activeBetterPlayerController,
@@ -139,6 +139,7 @@ class _VideoSequencePlayer2State extends State<VideoSequencePlayer2> {
   }
 }
 
+//----------------------------------- CUSTOM CONTROLS
 class CustomControlsWidget extends StatefulWidget {
   final BetterPlayerController? controller;
   final Function(bool visbility)? onControlsVisibilityChanged;
@@ -170,7 +171,7 @@ class _CustomControlsWidgetState extends State<CustomControlsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    print("${widget.controller!.isVideoInitialized()!}");
+    print("ISVIDEO INIT ${widget.controller!.isVideoInitialized()!}");
     return Positioned.fill(
       child: widget.controller!.isVideoInitialized()!
           ? Stack(

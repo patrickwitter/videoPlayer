@@ -19,14 +19,14 @@ class _DemoState extends State<Demo> {
         url:
             "https://storage.googleapis.com/staging.elite-firefly-403919.appspot.com/10sec2.mp4",
         name: "Clip2"),
-    Video(
-        url:
-            "https://storage.googleapis.com/staging.elite-firefly-403919.appspot.com/10sec1.mp4",
-        name: "Clip3"),
-    Video(
-        url:
-            "https://storage.googleapis.com/staging.elite-firefly-403919.appspot.com/10sec2.mp4",
-        name: "Clip4"),
+    // Video(
+    //     url:
+    //         "https://storage.googleapis.com/staging.elite-firefly-403919.appspot.com/10sec1.mp4",
+    //     name: "Clip3"),
+    // Video(
+    //     url:
+    //         "https://storage.googleapis.com/staging.elite-firefly-403919.appspot.com/10sec2.mp4",
+    //     name: "Clip4"),
   ];
   List<Video> timeline = [];
   @override

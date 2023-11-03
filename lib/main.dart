@@ -10,6 +10,7 @@ import 'package:reordablelist/reorder_gridview/demo_grid_builder.dart';
 import 'package:reordablelist/video_stich.dart';
 import 'package:reordablelist/video_stich2.dart';
 import 'package:reordablelist/video_stich_final.dart';
+import 'package:reordablelist/video_stich_final2.dart';
 
 void main() {
   runApp(const MyApp());
@@ -33,7 +34,9 @@ class MyApp extends StatelessWidget {
       // home: const CustomAttempt(),
       // home: VideoSequencePlayer(),
       // home: VideoSequencePlayer2(),
-      home: Demo(),
+      // home: Demo(),
+      // home: VideoSequencePlayer3(),
+      home: PlaylistPage(),
     );
   }
 }
